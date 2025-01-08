@@ -1,0 +1,32 @@
+config:
+  target: 'http://localhost:4567' # URL base da aplicação
+  phases:
+    - duration: 10               # Tempo do teste em segundos
+      arrivalRate: 10            # Número de usuários simulados por segundo
+scenarios:
+  # PERF-001: Criar uma busca no POST /crawl
+  - flow:
+      - post:
+          url: '/crawl'
+          json:
+            keyword: 'chmod'       # Palavra-chave enviada no POST
+          capture:
+            - json: '$.id'        # Captura o campo "id" da resposta JSON
+              as: taskId          # Armazena o valor na variável "taskId"
+
+  # PERF-002: Consultar o resultado no GET /crawl/:id usando o ID capturado
+  - flow:
+      - get:
+          url: '/crawl/{{ taskId }}' # Substitui a variável "taskId" pelo ID capturado
+
+  # PERF-003: Consultas combinadas (POST e GET simultâneos)
+  - flow:
+      - post:
+          url: '/crawl'
+          json:
+            keyword: 'security'   # Outra palavra-chave para testar consultas combinadas
+          capture:
+            - json: '$.id'
+              as: combinedTaskId
+      - get:
+          url: '/crawl/{{ combinedTaskId }}' # Substitui o ID capturado no GET subsequente

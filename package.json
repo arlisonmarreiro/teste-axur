@@ -1,0 +1,26 @@
+{
+  "name": "teste-axur",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles --verbose",
+    "test:performance": "artillery run performance-test.yml"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "uuid": "^11.0.4"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.21",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
