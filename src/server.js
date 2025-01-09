@@ -12,6 +12,42 @@ app.use(bodyParser.json());
 // Inicializa as tarefas no app.locals
 app.locals.tasks = {};
 
+// Função para buscar URLs nas sessões (1 a 8, exceto 6)
+const scrapeByKeyword = async (keyword) => {
+    const baseUrl = 'http://hiring.axreng.com/';
+    const results = [];
+
+    for (let session of [1, 2, 3, 4, 5, 7, 8]) {
+        const sessionUrl = `${baseUrl}index${session}.html`;
+
+        try {
+            const response = await axios.get(sessionUrl);
+            const html = response.data;
+            const $ = cheerio.load(html);
+
+            let keywordFound = false;
+
+            $('a').each((_, element) => {
+                let href = $(element).attr('href');
+                if (href && href.includes(keyword)) {
+                    keywordFound = true;
+                    const fullUrl = href.startsWith('http') ? href : new URL(href, baseUrl).href;
+                    results.push(fullUrl);
+                }
+            });
+
+            if (keywordFound) {
+                // Adiciona a URL da sessão ao resultado, caso a palavra-chave seja encontrada
+                results.push(sessionUrl);
+            }
+        } catch (error) {
+            console.error(`Error scraping session ${session}:`, error.message);
+        }
+    }
+
+    return results;
+};
+
 // Rota POST para iniciar uma nova busca
 app.post('/crawl', (req, res) => {
     const { keyword } = req.body;
@@ -24,6 +60,8 @@ app.post('/crawl', (req, res) => {
     }
 
     const id = Math.random().toString(36).substring(2, 10); // Gera ID alfanumérico
+
+    // Cria uma nova tarefa
     app.locals.tasks[id] = {
         id,
         keyword,
@@ -31,6 +69,19 @@ app.post('/crawl', (req, res) => {
         urls: []
     };
 
+    // Inicia o scraping em segundo plano
+    (async () => {
+        try {
+            const urls = await scrapeByKeyword(keyword);
+            app.locals.tasks[id].urls = urls;
+            app.locals.tasks[id].status = 'completed';
+        } catch (error) {
+            app.locals.tasks[id].status = 'error';
+            console.error(`Scraping failed for task ${id}:`, error.message);
+        }
+    })();
+
+    // Retorna apenas o ID da tarefa
     res.status(200).json({ id });
 });
 

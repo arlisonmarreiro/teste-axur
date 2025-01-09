@@ -3,10 +3,13 @@ const cheerio = require('cheerio');
 
 // Função para gerar um ID alfanumérico de 8 caracteres
 const generateAlphanumericId = () => {
-    return crypto.randomBytes(6) // Gera 6 bytes (48 bits)
-        .toString('base64')      // Converte para base64
-        .replace(/[^a-zA-Z0-9]/g, '') // Remove caracteres não alfanuméricos
-        .slice(0, 8);            // Garante exatamente 8 caracteres
+    let id = '';
+    while (id.length < 8) {
+        id += crypto.randomBytes(6)
+            .toString('base64')
+            .replace(/[^a-zA-Z0-9]/g, '');
+    }
+    return id.slice(0, 8); // Garante exatamente 8 caracteres
 };
 
 // Função para buscar uma palavra-chave em um conteúdo HTML

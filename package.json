@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose",
+    "test": "jest --forceExit --verbose",
     "test:performance": "artillery run performance-test.yml"
   },
   "keywords": [],
